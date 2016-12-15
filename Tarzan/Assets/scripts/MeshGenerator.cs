@@ -4,23 +4,27 @@ using System.Collections.Generic;
 
 public class MeshGenerator : MonoBehaviour{
 
+    [Header("Mesh Settings")]
     public int wallHeight = 5;
     public int textureTileSize = 10;
 
+    [Header("Collider Settings")]
     public bool AreCollidersPolygons = true;
     public bool liquidEffector = false;
 
+    [Header("Materials")]
     public Material[] materials;
 
     public bool filterOnMaterialType;
     public int filterMaterialType = -1;
 
+    public PhysicsMaterial2D physicsMaterial2D;
+    public Material invisibleMaterial;
+
+    [Header("Prefabs")]
     public GameObject cavePrefab;
     public GameObject wallPrefab;
 
-    public PhysicsMaterial2D physicsMaterial2D;
-
-    public Material invisibleMaterial;
 
     Chunk[,] chunks;
 

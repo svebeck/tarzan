@@ -6,10 +6,12 @@ using System;
 public class MapGenerator : MonoBehaviour {
     public static MapGenerator instance;
 
+    [Header("Mesh Types")]
     public MeshGenerator solids;
     public MeshGenerator water;
     public MeshGenerator lava;
 
+    [Header("Map Settings")]
     public int height = 128;
     public int width = 128;
 
@@ -27,21 +29,25 @@ public class MapGenerator : MonoBehaviour {
 
     public bool processRegions = true;
     public bool processBorder = true;
-
     public int borderSize = 5;
+
+    [Header("Cave Settings")]
     public int wallTreshholdSize = 50;
     public int roomTreshholdSize = 50;
 
     public bool connectAllRooms = true;
     public int passageRadius = 5;
 
+    [Header("Minerals")]
     public int mineralDeposits = 5;
     public List<int> maxMineralSizes;
 
+    [Header("Fluid Distribution")]
     public int waterPockets = 4;
     public int lavaPockets = 3;
     public int fluidChunkSize = 64;
 
+    [Header("Enemies")]
     public GameObject zombie;
     public int zombieAmount = 100;
 
@@ -607,6 +613,7 @@ public class MapGenerator : MonoBehaviour {
     float[,] newfluidMassMap;
 
     //Water properties
+    [Header("Fluid Simulation")]
     public float maxMass = 1.0f; //The normal, un-pressurized mass of a full water cell
     public float maxCompress = 0.02f; //How much excess water a cell can store, compared to the cell above it
     public float minMass = 0.0001f;  //Ignore cells that are almost dry
