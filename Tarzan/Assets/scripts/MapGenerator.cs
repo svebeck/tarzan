@@ -42,6 +42,8 @@ public class MapGenerator : MonoBehaviour {
     public int mineralDeposits = 5;
     public List<int> maxMineralSizes;
     public List<int> materialHealth;
+    public List<int> materialMinDepth;
+    public List<int> materialMaxDepth;
 
     [Header("Fluid Distribution")]
     public int waterPockets = 4;
@@ -607,9 +609,24 @@ public class MapGenerator : MonoBehaviour {
     {
         for (int i = 0; i < mineralDeposits; i++)
         {
-            int x = pseudoRandom.Next(0, width);
-            int y = pseudoRandom.Next(0, height);
             int material = pseudoRandom.Next(2, solids.materials.Length+1);
+
+            int minDepth = materialMinDepth[material-1];
+            int maxDepth = materialMaxDepth[material-1];
+
+            int x = pseudoRandom.Next(0, width);
+            int y = 0;
+
+            if (minDepth > 0 && maxDepth > 0)
+                y = pseudoRandom.Next(height-maxDepth, height-minDepth);
+            else if (minDepth > 0)
+                y = pseudoRandom.Next(0, height-minDepth);
+            else if (maxDepth > 0)
+                y = pseudoRandom.Next(height-maxDepth, height);
+            else
+                y = pseudoRandom.Next(0, height);
+                
+
 
             int maxSize = maxMineralSizes[material-1];
 
