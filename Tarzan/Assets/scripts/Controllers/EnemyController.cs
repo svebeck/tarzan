@@ -42,18 +42,27 @@ public class EnemyController : MonoBehaviour {
     void Start()
     {
         mapGenerator = MapGenerator.instance;
+
+        StartCoroutine(UpdateSpawn());
     }
 
 
     void Update()
     {
         RemoveInactiveEnemies();
+    }
 
-        if (player.transform.position.y < minSpawnDepth && enemies.Count < maxEnemies)
+    IEnumerator UpdateSpawn()
+    {
+        for (;;)
         {
-            SpawnAround(player);
-        }
+            yield return new WaitForSecondsRealtime(0.2f);
 
+            if (player.transform.position.y < minSpawnDepth && enemies.Count < maxEnemies)
+            {
+                SpawnAround(player);
+            }
+        }
     }
 
     public void SpawnAround(GameObject player)
@@ -64,14 +73,15 @@ public class EnemyController : MonoBehaviour {
         distance.Normalize();
         distance = distance * minSpawnDistance + distance * (maxSpawnDistance-minSpawnDistance);
             
-        Debug.Log("playerPosition: "+playerPosition);
-        Debug.Log("distance: "+distance);
 
         Vector3 spawnPosition = playerPosition + distance;
 
         Coord coord = mapGenerator.WorldPointToCoordClamped(spawnPosition);
 
-        mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 10);
+        coord = mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 5);
+
+        if (coord.tileX == -1 || coord.tileY == -1)
+            return;
 
         SpawnAtCoord(coord);
     }

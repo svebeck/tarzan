@@ -10,10 +10,14 @@ public class DigController : MonoBehaviour {
     public int digDamage = 1;
     public int bombDamage = 3;
 
+    public float digCooldown = 0.1f;
+
     public GameObject bombPrefab;
     public GameObject digPrefab;
 
     bool dirty = false;
+
+    bool onCooldown = false;
 
     GameObject player;
     int [,] diggedPlaces;
@@ -52,11 +56,15 @@ public class DigController : MonoBehaviour {
         if (player == null)
             return;
 
+        if (onCooldown)
+            return;
+
         if (Input.GetKeyUp(KeyCode.E))
         {
             Vector3 pos = player.transform.position;
             Vector2 direction = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical")).normalized;
             Dig(pos, direction, player);
+            StartCoroutine(Cooldown(digCooldown));
         }
 
         if (Input.GetKeyUp(KeyCode.F))
@@ -64,6 +72,7 @@ public class DigController : MonoBehaviour {
             Vector3 pos = player.transform.position;
             Vector2 direction = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical")).normalized;
             MakeMaterial(pos, direction);
+            StartCoroutine(Cooldown(digCooldown));
         }
 
         if (Input.GetKeyUp(KeyCode.Q))
@@ -73,9 +82,17 @@ public class DigController : MonoBehaviour {
 
             pos.x += direction.x;
 
-            StartCoroutine(Bomb(pos, direction));       
+            StartCoroutine(Bomb(pos, direction));  
+            StartCoroutine(Cooldown(digCooldown));     
         }
 	}
+
+    IEnumerator Cooldown(float value)
+    {
+        onCooldown = true;
+        yield return new WaitForSeconds(value);
+        onCooldown = false;
+    }
 
     Vector3 digPosition;
     public void Dig(Vector3 pos, Vector2 direction, GameObject digger)
@@ -134,8 +151,11 @@ public class DigController : MonoBehaviour {
             {
                 if (x < 0 || x > width-1 || y < 0 || y > height-1)
                     continue;
+
+                if (map.solidMap[x, y]-1 < 0)
+                    continue;
                 
-                if (diggedPlaces[x,y] >= map.solidMap[x, y] && map.solidMap[x,y] != 0)
+                if (diggedPlaces[x,y] >= map.materialHealth[map.solidMap[x, y]-1])
                 {
                     map.solidMap[x, y] = 0;
                     diggedPlaces[x,y] = 0;
@@ -199,7 +219,10 @@ public class DigController : MonoBehaviour {
         {
             for (int y = 0; y < height; y++)
             {
-                if (diggedPlaces[x,y] >= map.solidMap[x, y] && map.solidMap[x, y] != 0)
+                if (map.solidMap[x, y]-1 < 0)
+                    continue;
+                
+                if (diggedPlaces[x,y] >= map.materialHealth[map.solidMap[x, y]-1])
                 {
                     map.solidMap[x, y] = 0;
                     dirty = true;

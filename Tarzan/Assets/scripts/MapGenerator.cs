@@ -41,11 +41,14 @@ public class MapGenerator : MonoBehaviour {
     [Header("Minerals")]
     public int mineralDeposits = 5;
     public List<int> maxMineralSizes;
+    public List<int> materialHealth;
 
     [Header("Fluid Distribution")]
     public int waterPockets = 4;
     public int lavaPockets = 3;
     public int fluidChunkSize = 64;
+    public int minLavaDepth = 90;
+    public int minWaterDepth = 5;
 
     public int [,] solidMap;
     public int [,] fluidMap;
@@ -331,7 +334,7 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    public Coord FindNearestEmpty(int x, int y, int radius)
+    public Coord FindNearestEmpty(int x, int y, int tries)
     {
         if (!IsInsideMap(x, y))
             throw new UnityException("Can't find nearest outside of map.");
@@ -345,17 +348,17 @@ public class MapGenerator : MonoBehaviour {
         tileQueue.Enqueue(coord);
 
 
-        while(tileQueue.Count > 0)
+        while(tries > 0 && tileQueue.Count > 0)
         {
             Coord tile = tileQueue.Dequeue();
 
-            for (int xx = tile.tileX-1; x <= tile.tileX+1; x++)
+            for (int xx = tile.tileX-1; xx <= tile.tileX+1; xx++)
             {
-                for (int yy = tile.tileY-1; y <= tile.tileY+1; y++)
+                for (int yy = tile.tileY-1; yy <= tile.tileY+1; yy++)
                 {
                     if (IsInsideMap(xx, yy))
                     {
-                        if (solidMap[xx, yy] == 1)
+                        if (solidMap[xx, yy] > 0)
                         {
                             tileQueue.Enqueue(new Coord(xx, yy));
                         }
@@ -367,7 +370,12 @@ public class MapGenerator : MonoBehaviour {
                     }
                 }
             }
+
+            tries--;
         }
+
+        if (tries == 0)
+            return new Coord(-1,-1);
 
         return coord;
         
@@ -617,7 +625,7 @@ public class MapGenerator : MonoBehaviour {
         for (int i = 0; i < waterPockets; i++)
         {
             int x = pseudoRandom.Next(0, width);
-            int y = pseudoRandom.Next(0, height);
+            int y = pseudoRandom.Next(0, height-minWaterDepth);
 
             DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(5,15), 1, false, 0);
         }
@@ -625,7 +633,7 @@ public class MapGenerator : MonoBehaviour {
         for (int i = 0; i < lavaPockets; i++)
         {
             int x = pseudoRandom.Next(0, width);
-            int y = pseudoRandom.Next(0, height);
+            int y = pseudoRandom.Next(0, height- minLavaDepth);
 
             DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(5,10), 2, false, 0);
         }
