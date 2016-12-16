@@ -39,7 +39,7 @@ public class MapGenerator : MonoBehaviour {
     public int passageRadius = 5;
 
     [Header("Minerals")]
-    public int mineralDeposits = 5;
+    public List<int> mineralDeposits;
     public List<int> maxMineralSizes;
     public List<int> materialHealth;
     public List<int> materialMinDepth;
@@ -607,33 +607,36 @@ public class MapGenerator : MonoBehaviour {
 
     void RandomFillSolidMaterial()
     {
-        for (int i = 0; i < mineralDeposits; i++)
+        for (int i = 0; i < mineralDeposits.Count; i++)
         {
-            int material = pseudoRandom.Next(2, solids.materials.Length+1);
+            for (int j = 0; j < mineralDeposits[i]; j++)
+            {
+                int material = i+1;
 
-            int minDepth = materialMinDepth[material-1];
-            int maxDepth = materialMaxDepth[material-1];
+                int minDepth = materialMinDepth[material-1];
+                int maxDepth = materialMaxDepth[material-1];
 
-            int x = pseudoRandom.Next(0, width);
-            int y = 0;
+                int x = pseudoRandom.Next(0, width);
+                int y = 0;
 
-            if (minDepth > 0 && maxDepth > 0)
-                y = pseudoRandom.Next(height-maxDepth, height-minDepth);
-            else if (minDepth > 0)
-                y = pseudoRandom.Next(0, height-minDepth);
-            else if (maxDepth > 0)
-                y = pseudoRandom.Next(height-maxDepth, height);
-            else
-                y = pseudoRandom.Next(0, height);
-                
+                if (minDepth > 0 && maxDepth > 0)
+                    y = pseudoRandom.Next(height-maxDepth, height-minDepth);
+                else if (minDepth > 0)
+                    y = pseudoRandom.Next(0, height-minDepth);
+                else if (maxDepth > 0)
+                    y = pseudoRandom.Next(height-maxDepth, height);
+                else
+                    y = pseudoRandom.Next(0, height);
+                    
 
 
-            int maxSize = maxMineralSizes[material-1];
+                int maxSize = maxMineralSizes[material-1];
 
-            if (maxSize < 2)
-                return;
+                if (maxSize < 2)
+                    return;
 
-            DrawCircle(solidMap, new Coord(x,y), pseudoRandom.Next(2,maxSize), material, false, 1);
+                DrawCircle(solidMap, new Coord(x,y), pseudoRandom.Next(2,maxSize), material, false, 1);
+            }
         }
     }
 

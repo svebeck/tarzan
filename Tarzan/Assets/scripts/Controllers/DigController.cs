@@ -154,22 +154,25 @@ public class DigController : MonoBehaviour {
 
                 if (map.solidMap[x, y]-1 < 0)
                     continue;
-                
+
                 if (diggedPlaces[x,y] >= map.materialHealth[map.solidMap[x, y]-1])
                 {
+                    GameObject go = Instantiate(digPrefab);
+                    Vector3 worldPos = map.CoordToWorldPoint(new Coord(x,y));
+                    go.transform.position = worldPos; 
+
                     map.solidMap[x, y] = 0;
                     diggedPlaces[x,y] = 0;
                     dirty = true;
 
-                    GameObject go = Instantiate(digPrefab);
-                    Vector3 worldPos = map.CoordToWorldPoint(new Coord(x,y));
-                    go.transform.position = worldPos; 
                 }
             }
         }
 
         if (!dirty)
+        {
             return;
+        }
 
         map.UpdateDynamicSolids();
 
