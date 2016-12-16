@@ -3,7 +3,7 @@ using System.Collections;
 
 public class LightController : MonoBehaviour {
 
-    public Transform target;
+    public GameObject target;
     public Light sun;
     public Camera camera;
 
@@ -18,7 +18,10 @@ public class LightController : MonoBehaviour {
 
     void Update()
     {
-        float depthFactor = -target.position.y / 50f;
+        if (target == null)
+            return;
+        
+        float depthFactor = -target.transform.position.y / 50f;
 
         sun.intensity = Mathf.Lerp(sunIntensityStart, sunIntensityDeep, depthFactor);
         sun.color = Color.Lerp(sunLight, caveLight, depthFactor);

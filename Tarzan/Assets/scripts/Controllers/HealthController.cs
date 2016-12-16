@@ -69,7 +69,7 @@ public class HealthController : MonoBehaviour {
         if (health <= 0)
         {
             Instantiate(killEffect, this.transform.position, Quaternion.identity);
-            Destroy(this.gameObject);
+            this.gameObject.SetActive(false);
         }
     }
 }

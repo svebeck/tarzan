@@ -47,10 +47,6 @@ public class MapGenerator : MonoBehaviour {
     public int lavaPockets = 3;
     public int fluidChunkSize = 64;
 
-    [Header("Enemies")]
-    public GameObject zombie;
-    public int zombieAmount = 100;
-
     public int [,] solidMap;
     public int [,] fluidMap;
 
@@ -112,7 +108,6 @@ public class MapGenerator : MonoBehaviour {
         if (processBorder) ProcessBorder();
         RandomFillSolidMaterial();
         RandomFillFluidMaterial();
-        RandomFillZombies();
 
 
         player.GetComponent<Rigidbody2D>().isKinematic = true;
@@ -335,8 +330,58 @@ public class MapGenerator : MonoBehaviour {
             DrawCircle(coord, passageRadius, 0);
         }
     }
+
+    public Coord FindNearestEmpty(int x, int y, int radius)
+    {
+        if (!IsInsideMap(x, y))
+            throw new UnityException("Can't find nearest outside of map.");
         
-    void DrawCircle(Coord coord, int radius, int value)
+        if (solidMap[x,y] == 0)
+            return new Coord(x, y);
+
+        Coord coord = new Coord(x, y);
+
+        Queue<Coord> tileQueue = new Queue<Coord>();
+        tileQueue.Enqueue(coord);
+
+
+        while(tileQueue.Count > 0)
+        {
+            Coord tile = tileQueue.Dequeue();
+
+            for (int xx = tile.tileX-1; x <= tile.tileX+1; x++)
+            {
+                for (int yy = tile.tileY-1; y <= tile.tileY+1; y++)
+                {
+                    if (IsInsideMap(xx, yy))
+                    {
+                        if (solidMap[xx, yy] == 1)
+                        {
+                            tileQueue.Enqueue(new Coord(xx, yy));
+                        }
+                        else if (solidMap[xx, yy] == 0)
+                        {
+                            coord = new Coord(xx, yy);
+                            tileQueue.Clear(); 
+                        }
+                    }
+                }
+            }
+        }
+
+        return coord;
+        
+    }
+
+    public void DrawDot(int x, int y, int value)
+    {
+        if (IsInsideMap(x, y))
+        {
+            solidMap[x, y] = value;
+        }
+    }
+        
+    public void DrawCircle(Coord coord, int radius, int value)
     {
         for (int x = -radius; x <= radius; x++)
         {
@@ -445,6 +490,16 @@ public class MapGenerator : MonoBehaviour {
         pos.z = yy;
 
         return pos;
+    }
+
+    public Coord WorldPointToCoordClamped(Vector3 worldPos)
+    {
+        Coord coord = WorldPointToCoord(worldPos);
+
+        coord.tileX = Mathf.Clamp(coord.tileX, 0, width);
+        coord.tileY = Mathf.Clamp(coord.tileY, 0, height);
+
+        return coord;
     }
 
     public Coord WorldPointToCoord(Vector3 worldPos)
@@ -584,24 +639,6 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    void RandomFillZombies()
-    {
-        for (int i = 0; i < zombieAmount; i++)
-        {
-            int x = pseudoRandom.Next(10, width-10);
-            int y = pseudoRandom.Next(10, height-10);
-            Vector3 pos = CoordToWorldPoint(new Coord(x,y));
-            GameObject zombieGo = Instantiate(zombie);
-            zombieGo.transform.position = pos; 
-            zombieGo.GetComponent<AIZombie>().target = player;
-            DrawCircle(solidMap, new Coord(x,y), 1, 0);
-            solidMap[x,y-1] = 1;
-            solidMap[x-1,y-1] = 1;
-            solidMap[x+1,y-1] = 1;
-
-            solidMap[x,y+2] = 1;
-        }
-    }
 
     public bool IsInsideMap(int x, int y)
     {
@@ -641,6 +678,8 @@ public class MapGenerator : MonoBehaviour {
         for(;;)
         {
             yield return new WaitForSeconds(0.1f);
+
+            yield return new WaitForFixedUpdate();
 
             UpdateFluids();
             UpdateDynamicSolids();
@@ -815,9 +854,22 @@ public class MapGenerator : MonoBehaviour {
                 int material = solidMap[x,y];
                 if (material != 2)
                     continue;
-
+                    
                 if (solidMap[x,y-1] != 0)
                     continue;
+                
+
+                if ((x == playerCoord.tileX && y-1 == playerCoord.tileY) ||
+                    (x-1 == playerCoord.tileX && y-1 == playerCoord.tileY) ||
+                    (x+2 == playerCoord.tileX && y-1 == playerCoord.tileY) ||
+                    (x-1 == playerCoord.tileX && y-1 == playerCoord.tileY) ||
+                    (x+2 == playerCoord.tileX && y-1 == playerCoord.tileY)||
+                    (x == playerCoord.tileX && y-2 == playerCoord.tileY))
+                {
+                    //player is below, do something
+                    continue;
+                }
+
 
                 solidMap[x,y] = 0;
                 solidMap[x,y-1] = material;
@@ -880,24 +932,22 @@ public class MapGenerator : MonoBehaviour {
     {
         for (;;)
         {
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForFixedUpdate();
 
             if (player == null)
                 yield break;
             
             Vector3 pos = player.transform.position;
             Coord coord = WorldPointToCoord(pos);
-
+                
             if (coord.tileX != playerCoord.tileX || coord.tileY != playerCoord.tileY)
             {
                 UpdateMeshGenerator(coord, chunkSize, solids, solidMap, false);
             }
-            else
-            {
-                yield return new WaitForSeconds(0.1f);
-                UpdateMeshGenerator(coord, fluidChunkSize, water, fluidMap, false);
-                UpdateMeshGenerator(coord, fluidChunkSize, lava, fluidMap, false);
-            }
+
+            UpdateMeshGenerator(coord, fluidChunkSize, water, fluidMap, false);
+            UpdateMeshGenerator(coord, fluidChunkSize, lava, fluidMap, false);
+
 
 
             playerCoord = coord;

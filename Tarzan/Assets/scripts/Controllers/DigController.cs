@@ -104,6 +104,8 @@ public class DigController : MonoBehaviour {
             }
         }
 
+        Debug.Log("Dig coords: " + coord.ToString());
+
         map.DrawCircle(diggedPlaces, coord, digRadius, digDamage, true);
 
         if (direction.y > 0 && direction.x > 0)
@@ -136,6 +138,7 @@ public class DigController : MonoBehaviour {
                 if (diggedPlaces[x,y] >= map.solidMap[x, y] && map.solidMap[x,y] != 0)
                 {
                     map.solidMap[x, y] = 0;
+                    diggedPlaces[x,y] = 0;
                     dirty = true;
 
                     GameObject go = Instantiate(digPrefab);

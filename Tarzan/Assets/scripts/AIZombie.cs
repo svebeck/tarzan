@@ -6,6 +6,7 @@ public class AIZombie : MonoBehaviour {
     public GameObject target;
     public float visionRange = 180f;
     public float hearingRange = 200f;
+    public float wanderRange = 900f;
     public float closeRange = 10f;
     public float damage = 1f;
     public float attackReloadTime = 1f;
@@ -65,29 +66,22 @@ public class AIZombie : MonoBehaviour {
         gravity = rigidbody2D.gravityScale;
 
         meshGameObject = GetComponentInChildren<MeshRenderer>().gameObject;
-        meshGameObject.SetActive(false);
-
-        rigidbody2D.isKinematic = true;
     }
 
     void Update () 
     {
-        if (rigidbody2D.isKinematic && target && diff.magnitude < 60*60)
-        {
-            Vector3 screenPoint = Camera.main.WorldToViewportPoint(transform.position);
-            if (screenPoint.z > -0.2 && screenPoint.x > -0.2 && screenPoint.x < 1.2 && screenPoint.y > -0.2 && screenPoint.y < 1.2)
-            {
-                rigidbody2D.isKinematic = false;
-                meshGameObject.SetActive(true);
-            }
+        float diffSQR = diff.sqrMagnitude;
 
+        if ( diffSQR > wanderRange)
+        {
+            this.gameObject.SetActive(false);
             return;
         }
 
         if (m_Grounded && target)
         {
 
-            if (diff.sqrMagnitude < visionRange)
+            if (diffSQR < visionRange)
             {
                 velocity = new Vector2(diff.x, 0).normalized * attackMoveSpeed;
 
@@ -123,11 +117,11 @@ public class AIZombie : MonoBehaviour {
                     }
                 }
             }
-            else if (diff.sqrMagnitude < hearingRange)
+            else if (diffSQR < hearingRange)
             {
                 velocity = new Vector2(0f, 0f);
             }
-            else
+            else if (diffSQR < wanderRange)
             {
                 if (randomDirectionTimer >= randomDirectionTime)
                 {
@@ -139,6 +133,10 @@ public class AIZombie : MonoBehaviour {
                 }
                 randomDirectionTimer += Time.deltaTime;
             }
+            else
+            {
+                velocity = new Vector2(0f, 0f);
+            }
 
             oldDiffX = diff.x;
 
@@ -148,11 +146,12 @@ public class AIZombie : MonoBehaviour {
 
     void FixedUpdate() 
     {
+        if (target != null)
+            diff = target.transform.position - transform.position;
+        
         if (rigidbody2D.isKinematic)
             return;
         
-        if (target != null)
-            diff = target.transform.position - transform.position;
 
         m_Grounded = false;
         m_Swiming = false;
