@@ -36,6 +36,7 @@ public class MapGenerator : MonoBehaviour {
     public List<int> materialHealth;
     public List<int> materialMinDepth;
     public List<int> materialMaxDepth;
+    public List<int> materialShape;
 
     [Header("Fluid Distribution")]
     public int waterPockets = 4;
@@ -367,6 +368,24 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    public void DrawVein(int[,] map, Coord coord, int length, int value, int targetValue = -1)
+    {
+        int drawX = coord.tileX;
+        int drawY = coord.tileY;
+
+        while (coord.tileX == drawX && coord.tileY == drawY)
+        {
+            drawX = coord.tileX + pseudoRandom.Next(-1,1);
+            drawY = coord.tileY + pseudoRandom.Next(-1,1);
+        }
+
+        if (IsInsideMap(drawX, drawY) && (targetValue == -1 || map[drawX, drawY] == targetValue))
+        {
+            solidMap[drawX, drawY] = value;
+            DrawVein(map, new Coord(drawX, drawY), --length, value, targetValue);
+        }
+    }
+
     List<Coord> GetLine(Coord from, Coord to)
     {
         List<Coord> line = new List<Coord>();
@@ -538,7 +557,33 @@ public class MapGenerator : MonoBehaviour {
                 if (maxSize < 1)
                     continue;
 
-                DrawCircle(solidMap, new Coord(x,y), pseudoRandom.Next(1, maxSize), material, false, 1);
+                int shape = materialShape[material-1];
+
+                if (shape == 0)
+                    shape = pseudoRandom.Next(1,3);
+
+                // Circle
+                if (shape == 1)
+                {
+                    DrawCircle(solidMap, new Coord(x,y), pseudoRandom.Next(1, maxSize), material, false, 1);
+                }
+
+                // Random Cluster
+                else if (shape == 2)
+                {
+                    int size = pseudoRandom.Next(maxSize*2, maxSize*2);
+                    for (int k = 0; k < size; k++)
+                    {
+                        DrawCircle(solidMap, new Coord(x+pseudoRandom.Next(-maxSize,maxSize),y+pseudoRandom.Next(-maxSize,maxSize)), 0, material, false, 1);
+                    }
+                }
+
+                // Vein
+                else if (shape == 3)
+                {
+                    int size = pseudoRandom.Next(maxSize, maxSize*2);
+                    DrawVein(solidMap, new Coord(x,y), size, material, 1);
+                }
             }
         }
     }
