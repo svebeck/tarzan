@@ -20,6 +20,7 @@ public class EnemyController : MonoBehaviour {
     public List<float> rarity;
 
     List<GameObject> enemies = new List<GameObject>();
+    MapController mapController;
     MapGenerator mapGenerator;
 
     void Awake()
@@ -41,6 +42,7 @@ public class EnemyController : MonoBehaviour {
 
     void Start()
     {
+        mapController = MapController.instance;
         mapGenerator = MapGenerator.instance;
 
         StartCoroutine(UpdateSpawn());
@@ -76,7 +78,7 @@ public class EnemyController : MonoBehaviour {
 
         Vector3 spawnPosition = playerPosition + distance;
 
-        Coord coord = mapGenerator.WorldPointToCoordClamped(spawnPosition);
+        Coord coord = mapController.WorldPointToCoordClamped(spawnPosition);
 
         coord = mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 5);
 
@@ -116,7 +118,7 @@ public class EnemyController : MonoBehaviour {
             throw new UnityException("Rarity function is not really working :-/ no enemy selected");
         }
 
-        Vector3 worldPos = mapGenerator.CoordToWorldPoint(coord);
+        Vector3 worldPos = mapController.CoordToWorldPoint(coord);
         GameObject zombieGo = Instantiate(enemy);
         zombieGo.transform.position = worldPos; 
 

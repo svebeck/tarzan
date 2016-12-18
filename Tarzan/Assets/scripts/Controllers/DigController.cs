@@ -22,7 +22,8 @@ public class DigController : MonoBehaviour {
     GameObject player;
     int [,] diggedPlaces;
 
-    MapGenerator map;
+    MapGenerator mapGenerator;
+    MapController mapController;
 
     void Awake()
     {
@@ -39,18 +40,19 @@ public class DigController : MonoBehaviour {
 	void Start () {
         player = GameObject.FindGameObjectWithTag("Player");
 
+        mapController = MapController.instance;
+        mapGenerator = MapGenerator.instance;
+
 	}
 
-    public void Init(MapGenerator map)
+    public void Init()
     {
-        this.map = map;
-
-        diggedPlaces = new int[map.width, map.height];
+        diggedPlaces = new int[mapGenerator.width, mapGenerator.height];
     }
 
 	void Update () 
     {
-        if (map == null)
+        if (mapGenerator == null)
             return;
 
         if (player == null)
@@ -99,7 +101,7 @@ public class DigController : MonoBehaviour {
     {
         digPosition.x = pos.x+direction.x;
         digPosition.y = pos.y+direction.y;
-        Coord coord = map.WorldPointToCoord(pos);
+        Coord coord = mapController.WorldPointToCoord(pos);
 
         coord.tileX += Mathf.RoundToInt(direction.x);
         coord.tileY += Mathf.RoundToInt(direction.y);
@@ -123,27 +125,27 @@ public class DigController : MonoBehaviour {
 
         Debug.Log("Dig coords: " + coord.ToString());
 
-        map.DrawCircle(diggedPlaces, coord, digRadius, digDamage, true);
+        mapGenerator.DrawCircle(diggedPlaces, coord, digRadius, digDamage, true);
 
         if (direction.y > 0 && direction.x > 0)
         {
-            map.DrawCircle(diggedPlaces, new Coord(coord.tileX-1, coord.tileY), digRadius, digDamage, true);
+            mapGenerator.DrawCircle(diggedPlaces, new Coord(coord.tileX-1, coord.tileY), digRadius, digDamage, true);
         }
 
         if (direction.y > 0 && direction.x < 0)
         {
-            map.DrawCircle(diggedPlaces, new Coord(coord.tileX+1, coord.tileY), digRadius, digDamage, true);
+            mapGenerator.DrawCircle(diggedPlaces, new Coord(coord.tileX+1, coord.tileY), digRadius, digDamage, true);
         }
 
         if (direction.y < 0 && direction.x != 0)
         {
-            map.DrawCircle(diggedPlaces, new Coord(coord.tileX, coord.tileY+1), digRadius, digDamage, true);
+            mapGenerator.DrawCircle(diggedPlaces, new Coord(coord.tileX, coord.tileY+1), digRadius, digDamage, true);
         }
 
         dirty = false;
 
-        int width = map.width;
-        int height = map.height;
+        int width = mapGenerator.width;
+        int height = mapGenerator.height;
 
         for (int x = coord.tileX-10; x < coord.tileX+10; x++)
         {
@@ -152,16 +154,16 @@ public class DigController : MonoBehaviour {
                 if (x < 0 || x > width-1 || y < 0 || y > height-1)
                     continue;
 
-                if (map.solidMap[x, y]-1 < 0)
+                if (mapGenerator.solidMap[x, y]-1 < 0)
                     continue;
 
-                if (diggedPlaces[x,y] >= map.materialHealth[map.solidMap[x, y]-1])
+                if (diggedPlaces[x,y] >= mapGenerator.materialHealth[mapGenerator.solidMap[x, y]-1])
                 {
                     GameObject go = Instantiate(digPrefab);
-                    Vector3 worldPos = map.CoordToWorldPoint(new Coord(x,y));
+                    Vector3 worldPos = mapController.CoordToWorldPoint(new Coord(x,y));
                     go.transform.position = worldPos; 
 
-                    map.solidMap[x, y] = 0;
+                    mapGenerator.solidMap[x, y] = 0;
                     diggedPlaces[x,y] = 0;
                     dirty = true;
 
@@ -174,11 +176,11 @@ public class DigController : MonoBehaviour {
             return;
         }
 
-        map.UpdateDynamicSolids();
+        mapController.UpdateDynamicSolids();
 
         dirty = false;
 
-        map.UpdateMeshGenerator(coord, map.chunkSize, map.solids, map.solidMap);
+        mapController.UpdateMeshGenerator(coord, mapController.chunkSize, mapController.solids, mapGenerator.solidMap);
     }
 
     Vector3 bombPosition;
@@ -195,7 +197,7 @@ public class DigController : MonoBehaviour {
         yield return new WaitForSeconds(1.9f);
 
         pos = go.transform.position;
-        Coord coord = map.WorldPointToCoord(pos);
+        Coord coord = mapController.WorldPointToCoord(pos);
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(go.transform.position, bombRadius);
         for (int i = 0; i < colliders.Length; i++)
@@ -211,27 +213,27 @@ public class DigController : MonoBehaviour {
         }
 
 
-        map.DrawCircle(diggedPlaces, coord, bombRadius, bombDamage, true);
+        mapGenerator.DrawCircle(diggedPlaces, coord, bombRadius, bombDamage, true);
 
         dirty = false;
 
-        int width = map.width;
-        int height = map.height;
+        int width = mapGenerator.width;
+        int height = mapGenerator.height;
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.solidMap[x, y]-1 < 0)
+                if (mapGenerator.solidMap[x, y]-1 < 0)
                     continue;
                 
-                if (diggedPlaces[x,y] >= map.materialHealth[map.solidMap[x, y]-1])
+                if (diggedPlaces[x,y] >= mapGenerator.materialHealth[mapGenerator.solidMap[x, y]-1])
                 {
-                    map.solidMap[x, y] = 0;
+                    mapGenerator.solidMap[x, y] = 0;
                     dirty = true;
 
                     go = Instantiate(digPrefab);
-                    Vector3 worldPos = map.CoordToWorldPoint(new Coord(x,y));
+                    Vector3 worldPos = mapController.CoordToWorldPoint(new Coord(x,y));
                     go.transform.position = worldPos; 
                 }
             }
@@ -242,20 +244,20 @@ public class DigController : MonoBehaviour {
 
         dirty = false;
 
-        map.UpdateMeshGenerator(coord, map.chunkSize, map.solids, map.solidMap);
+        mapController.UpdateMeshGenerator(coord, mapController.chunkSize, mapController.solids, mapGenerator.solidMap);
     }
 
 
     public void MakeMaterial(Vector3 pos, Vector3 direction)
     {
-        Coord coord = map.WorldPointToCoord(pos);
+        Coord coord = mapController.WorldPointToCoord(pos);
 
         coord.tileX += (int)direction.x;
         coord.tileY += (int)direction.y;
 
-        map.DrawCircle(map.solidMap, coord, 0, 1);
+        mapGenerator.DrawCircle(mapGenerator.solidMap, coord, 0, 1);
 
-        map.UpdateMeshGenerator(coord, map.chunkSize, map.solids, map.solidMap);
+        mapController.UpdateMeshGenerator(coord, mapController.chunkSize, mapController.solids, mapGenerator.solidMap);
     }
 
 
