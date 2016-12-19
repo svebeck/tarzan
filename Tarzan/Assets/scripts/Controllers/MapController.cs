@@ -37,16 +37,16 @@ public class MapController : MonoBehaviour {
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        player.GetComponent<Rigidbody2D>().isKinematic = true;
     }
 
     public IEnumerator Init(MapGenerator map)
     {
+        this.map = map;
         width = map.width;
         height = map.height;
         solidMap = map.solidMap;
         fluidMap = map.fluidMap;
-
-        player.GetComponent<Rigidbody2D>().isKinematic = true;
 
         DigController.instance.Init();
 
@@ -324,7 +324,7 @@ public class MapController : MonoBehaviour {
                     continue;
 
                 int material = solidMap[x,y];
-                if (material != 2)
+                if (material > 0 && map.materialBehaviour[material-1] == 0)
                     continue;
 
                 if (solidMap[x,y-1] != 0)

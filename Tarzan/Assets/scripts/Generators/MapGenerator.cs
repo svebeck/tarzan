@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using UnityEngine.SceneManagement;
 
 public class MapGenerator : MonoBehaviour {
     public static MapGenerator instance;
@@ -37,6 +38,7 @@ public class MapGenerator : MonoBehaviour {
     public List<int> materialMinDepth;
     public List<int> materialMaxDepth;
     public List<int> materialShape;
+    public List<int> materialBehaviour;
 
     [Header("Fluid Distribution")]
     public int waterPockets = 4;
@@ -63,16 +65,15 @@ public class MapGenerator : MonoBehaviour {
 
 	void Start() 
     {
-        StartCoroutine(GenerateMap());
 	}
 
 
     public void Refresh()
     {
-        Application.LoadLevel(Application.loadedLevelName);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    IEnumerator GenerateMap()
+    public IEnumerator Generate()
     {
         StopCoroutine("UpdateFluids");
         StopCoroutine("UpdateByPlayer");
@@ -95,8 +96,6 @@ public class MapGenerator : MonoBehaviour {
         if (processBorder) ProcessBorder();
         RandomFillSolidMaterial();
         RandomFillFluidMaterial();
-
-        StartCoroutine(MapController.instance.Init(this));
     }
 
     void ProcessBorder()

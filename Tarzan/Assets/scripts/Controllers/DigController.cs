@@ -268,4 +268,9 @@ public class DigController : MonoBehaviour {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(bombPosition, 1f);
     }
+
+    public void SetDigDamage(int damage)
+    {
+        digDamage = damage;
+    }
 }
