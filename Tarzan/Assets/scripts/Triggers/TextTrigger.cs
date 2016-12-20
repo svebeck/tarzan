@@ -44,6 +44,9 @@ public class TextTrigger : MonoBehaviour
         if (!triggered)
             return;
 
+        if (target == null)
+            return;
+
         text.transform.position = target.transform.position;
     }
 

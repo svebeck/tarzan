@@ -32,6 +32,8 @@ public class App : MonoBehaviour
         viewController.Init();
         viewController.ChangeView(viewController.viewLoading);
 
+        yield return new WaitForSeconds(2f);
+
         SpawnPlayer();
 
         MapGenerator map = MapGenerator.instance;
@@ -75,7 +77,7 @@ public class App : MonoBehaviour
 
     public void Refresh()
     {
-        SpawnPlayer();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void NextLevel(int level)
