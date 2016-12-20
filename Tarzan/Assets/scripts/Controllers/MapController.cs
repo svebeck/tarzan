@@ -45,9 +45,19 @@ public class MapController : MonoBehaviour {
         GameObject player = App.instance.GetPlayer();
         Vector3 pos = player.transform.position;
         Coord coord = WorldPointToCoord(pos);
+
+        for(int i = 0; i < map.width; i++)
+        {
+            for(int j = 0; j < map.height; j++)
+            {
+                if (solidMap[i,j] > map.materialBehaviour.Count)
+                    throw new UnityException("Material at "+i+","+j+" bigger than behaviours.");
+            }
+        }
+
         playerCoord = coord;
 
-        UpdateMeshGenerator(coord, chunkSize, solids, solidMap, false);
+        UpdateMeshGenerator(playerCoord, chunkSize, solids, solidMap, false);
 
         StopCoroutine(UpdateDynamic());
         StopCoroutine(UpdateByPlayer());
@@ -308,6 +318,8 @@ public class MapController : MonoBehaviour {
 
     public void UpdateDynamicSolids()
     {
+        bool dirty = false;
+
         for (int x = playerCoord.tileX - 30; x < playerCoord.tileX + 30; x++)
         {
             for (int y = playerCoord.tileY - 30; y < playerCoord.tileY + 30; y++)
@@ -316,7 +328,11 @@ public class MapController : MonoBehaviour {
                     continue;
 
                 int material = solidMap[x,y];
-                if (material > 0 && map.materialBehaviour[material-1] == 0)
+
+                if (material == 0)
+                    continue;
+
+                if (map.materialBehaviour[material-1] == 0)
                     continue;
 
                 if (solidMap[x,y-1] != 0)
@@ -334,11 +350,14 @@ public class MapController : MonoBehaviour {
                     continue;
                 }
 
-
+                dirty = true;
                 solidMap[x,y] = 0;
                 solidMap[x,y-1] = material;
             }
         }
+
+        if (dirty)
+            UpdateMeshGenerator(playerCoord, chunkSize, solids, solidMap, false);
     }
 
     void DoChemistry()

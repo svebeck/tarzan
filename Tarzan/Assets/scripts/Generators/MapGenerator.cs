@@ -102,7 +102,7 @@ public class MapGenerator : MonoBehaviour {
             {
                 if (x >= borderSize && x < width - borderSize && y >= borderSize && y < height - borderSize)
                 {
-                    solidMap[x,y] = solidMap[x, y];
+                    //do nothing
                 }
                 else if (y >= height - borderSize)
                 {
