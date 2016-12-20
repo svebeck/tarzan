@@ -17,7 +17,6 @@ public class ViewController : MonoBehaviour {
     void Awake() {
         if (instance == null)
         {
-            DontDestroyOnLoad(this);
             instance = this;
         }
         else if (instance != this)

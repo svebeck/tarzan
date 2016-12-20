@@ -42,9 +42,13 @@ public class MapGenerator : MonoBehaviour {
 
     [Header("Fluid Distribution")]
     public int waterPockets = 4;
+    public int minWaterDepth = 5;
+    public int minWaterSize = 5;
+    public int maxWaterSize = 15;
     public int lavaPockets = 3;
     public int minLavaDepth = 90;
-    public int minWaterDepth = 5;
+    public int minLavaSize = 5;
+    public int maxLavaSize = 10;
 
     public int[,] solidMap;
     public int[,] fluidMap;
@@ -66,18 +70,10 @@ public class MapGenerator : MonoBehaviour {
 	void Start() 
     {
 	}
-
-
-    public void Refresh()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+       
 
     public IEnumerator Generate()
     {
-        StopCoroutine("UpdateFluids");
-        StopCoroutine("UpdateByPlayer");
-
         solidMap = new int[width, height];
         fluidMap = new int[width, height];
 
@@ -108,9 +104,13 @@ public class MapGenerator : MonoBehaviour {
                 {
                     solidMap[x,y] = solidMap[x, y];
                 }
-                else
+                else if (y >= height - borderSize)
                 {
                     solidMap[x,y] = 0; // handle more materials, maybe choose border material
+                }
+                else
+                {
+                    solidMap[x,y] = 1; // handle more materials, maybe choose border material
                 }
             }
         }
@@ -594,7 +594,7 @@ public class MapGenerator : MonoBehaviour {
             int x = pseudoRandom.Next(0, width);
             int y = pseudoRandom.Next(0, height-minWaterDepth);
 
-            DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(5,15), 1, false, 0);
+            DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(minWaterSize, maxWaterSize), 1, false, 0);
         }
 
         for (int i = 0; i < lavaPockets; i++)
@@ -602,7 +602,7 @@ public class MapGenerator : MonoBehaviour {
             int x = pseudoRandom.Next(0, width);
             int y = pseudoRandom.Next(0, height- minLavaDepth);
 
-            DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(5,10), 2, false, 0);
+            DrawCircle(fluidMap, new Coord(x,y), pseudoRandom.Next(minLavaSize, maxLavaSize), 2, false, 0);
         }
 
         for (int x = 0; x < width; x++)

@@ -14,8 +14,6 @@ public class MapController : MonoBehaviour {
     public float squareSize = 2;
     public int fluidChunkSize = 64;
 
-    GameObject player;
-
     private int width;
     private int height;
     private MapGenerator map;
@@ -34,13 +32,7 @@ public class MapController : MonoBehaviour {
         }
     }
 
-    void Start()
-    {
-        player = GameObject.FindGameObjectWithTag("Player");
-        player.GetComponent<Rigidbody2D>().isKinematic = true;
-    }
-
-    public IEnumerator Init(MapGenerator map)
+    public void Init(MapGenerator map)
     {
         this.map = map;
         width = map.width;
@@ -50,17 +42,15 @@ public class MapController : MonoBehaviour {
 
         DigController.instance.Init();
 
+        GameObject player = App.instance.GetPlayer();
         Vector3 pos = player.transform.position;
         Coord coord = WorldPointToCoord(pos);
         playerCoord = coord;
 
         UpdateMeshGenerator(coord, chunkSize, solids, solidMap, false);
 
-        player.transform.Translate(Vector3.up*5);
-
-        yield return new WaitForSeconds(0.5f);
-
-        player.GetComponent<Rigidbody2D>().isKinematic = false;
+        StopCoroutine(UpdateDynamic());
+        StopCoroutine(UpdateByPlayer());
 
         StartCoroutine(UpdateDynamic());
         StartCoroutine(UpdateByPlayer());
@@ -98,6 +88,8 @@ public class MapController : MonoBehaviour {
         for (;;)
         {
             yield return new WaitForFixedUpdate();
+
+            GameObject player = App.instance.GetPlayer();
 
             if (player == null)
                 yield break;

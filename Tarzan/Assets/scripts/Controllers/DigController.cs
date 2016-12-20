@@ -38,8 +38,6 @@ public class DigController : MonoBehaviour {
     }
 
 	void Start () {
-        player = GameObject.FindGameObjectWithTag("Player");
-
         mapController = MapController.instance;
         mapGenerator = MapGenerator.instance;
 
@@ -52,6 +50,8 @@ public class DigController : MonoBehaviour {
 
 	void Update () 
     {
+        player = App.instance.GetPlayer();
+
         if (mapGenerator == null)
             return;
 
@@ -272,5 +272,11 @@ public class DigController : MonoBehaviour {
     public void SetDigDamage(int damage)
     {
         digDamage = damage;
+    }
+
+
+    public void SetBombDamage(int damage)
+    {
+        bombDamage = damage;
     }
 }

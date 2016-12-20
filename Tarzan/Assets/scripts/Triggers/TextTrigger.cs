@@ -13,7 +13,9 @@ public class TextTrigger : MonoBehaviour
 
     public OnEnter onEnter;
 
-    bool pickedUp = false;
+    bool triggered = false;
+
+    Collider2D target;
 
     void Start()
     {
@@ -22,16 +24,27 @@ public class TextTrigger : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        if (pickedUp)
+        if (triggered)
             return;
 
         text.gameObject.SetActive(true);
+        //text.transform.SetParent(collider.transform);
 
-        pickedUp = true;
+        target = collider;
+
+        triggered = true;
 
         onEnter.Invoke();
 
         StartCoroutine(Animate());
+    }
+
+    void Update()
+    {
+        if (!triggered)
+            return;
+
+        text.transform.position = target.transform.position;
     }
 
     IEnumerator Animate()
@@ -47,10 +60,10 @@ public class TextTrigger : MonoBehaviour
             text.transform.localScale = new Vector3(scale, scale, scale);
         }
 
-        for (int i = 0; i < 200; i++)
+        for (int i = 0; i < 100; i++)
         {
             yield return new WaitForEndOfFrame();
-            text.alpha -= 0.005f;
+            text.alpha -= 0.01f;
         }
 
         Destroy(this);

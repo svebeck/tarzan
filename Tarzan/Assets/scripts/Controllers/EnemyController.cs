@@ -5,8 +5,7 @@ using System.Collections.Generic;
 public class EnemyController : MonoBehaviour {
     public static EnemyController instance;
 
-    public GameObject player;
-
+    private GameObject target;
 
     public int minSpawnDepth = -50;
     public int minEnemies = 0;
@@ -60,16 +59,21 @@ public class EnemyController : MonoBehaviour {
         {
             yield return new WaitForSecondsRealtime(0.2f);
 
-            if (player.transform.position.y < minSpawnDepth && enemies.Count < maxEnemies)
+            if (target == null)
             {
-                SpawnAround(player);
+                target = App.instance.GetPlayer();
+                yield return true;
+            }
+            else if (target.transform.position.y < minSpawnDepth && enemies.Count < maxEnemies)
+            {
+                SpawnRandomEnemyAround(target);
             }
         }
     }
 
-    public void SpawnAround(GameObject player)
+    public void SpawnRandomEnemyAround(GameObject target)
     {
-        Vector3 playerPosition = player.transform.position;
+        Vector3 playerPosition = target.transform.position;
 
         Vector3 distance = new Vector3((1-2*Random.value), (1-2*Random.value), 0);
         distance.Normalize();
@@ -85,10 +89,10 @@ public class EnemyController : MonoBehaviour {
         if (coord.tileX == -1 || coord.tileY == -1)
             return;
 
-        SpawnAtCoord(coord);
+        SpawnRandomEnemyAtCoord(coord);
     }
 
-    public void SpawnAtCoord(Coord coord)
+    public void SpawnRandomEnemyAtCoord(Coord coord)
     {
         float totalRarity = 0f;
 
@@ -103,41 +107,36 @@ public class EnemyController : MonoBehaviour {
 
         float value = Random.value;
 
-        GameObject enemy = null;
+        GameObject enemyPrefab = null;
 
         for (int i = 0; i < rarity.Count; i++)
         {
             if (value < rarity[i]/totalRarity)
             {
-                enemy = enemyPrefabs[i];
+                enemyPrefab = enemyPrefabs[i];
             }
         }
 
-        if (enemy == null)
+        if (enemyPrefab == null)
         {
             throw new UnityException("Rarity function is not really working :-/ no enemy selected");
         }
 
         Vector3 worldPos = mapController.CoordToWorldPoint(coord);
-        GameObject zombieGo = Instantiate(enemy);
-        zombieGo.transform.position = worldPos; 
+
+        SpawnAtPosition(worldPos, enemyPrefab);
+    }
+
+    public void SpawnAtPosition(Vector3 pos, GameObject enemyPrefab)
+    {
+
+        GameObject zombieGo = Instantiate(enemyPrefab);
+        zombieGo.transform.position = pos; 
 
         AIZombie zombie = zombieGo.GetComponent<AIZombie>();
-        zombie.target = player;
+        zombie.target = target;
 
         enemies.Add(zombieGo);
-
-        int x = coord.tileX;
-        int y = coord.tileY;
-
-        /*
-        mapGenerator.DrawDot(x-1, y, 0);
-        mapGenerator.DrawDot(x+1, y, 0);
-        mapGenerator.DrawDot(x, y, 0);
-        mapGenerator.DrawDot(x, y+2, 1);
-        mapGenerator.DrawDot(x, y-1, 1);
-        mapGenerator.DrawDot(x-1, y-1, 1);
-        mapGenerator.DrawDot(x+1, y-1, 1);*/
     }
 
     public void RemoveInactiveEnemies()
@@ -153,6 +152,11 @@ public class EnemyController : MonoBehaviour {
                 Destroy(enemy);
             }
         }
+    }
+
+    public void SetTarget(GameObject target)
+    {
+        this.target = target;
     }
 
 }
