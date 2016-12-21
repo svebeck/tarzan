@@ -75,6 +75,13 @@ public class HealthController : MonoBehaviour {
         if (health <= 0)
         {
             Instantiate(killEffect, this.transform.position, Quaternion.identity);
+
+            if (gameObject == App.instance.GetPlayer())
+            {
+                ViewController viewController = ViewController.instance;
+                viewController.ChangeView(viewController.viewDead);
+            }
+
             this.gameObject.SetActive(false);
         }
     }

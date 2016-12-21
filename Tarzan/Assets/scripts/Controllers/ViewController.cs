@@ -10,6 +10,7 @@ public class ViewController : MonoBehaviour {
     public View viewPlay;
     public View viewShop;
     public View viewLoading;
+    public View viewDead;
 
     private View currentView;
     private List<View> previousViews = new List<View>();
@@ -32,6 +33,7 @@ public class ViewController : MonoBehaviour {
         viewPlay.SetActive(true);
         viewShop.SetActive(true);
         viewLoading.SetActive(true);
+        viewDead.SetActive(true);
     }
 
     public void Init()
@@ -39,6 +41,7 @@ public class ViewController : MonoBehaviour {
         viewPlay.SetActive(false);
         viewShop.SetActive(false);
         viewLoading.SetActive(false);
+        viewDead.SetActive(false);
     }
 
     public void ChangeView(View view)
@@ -86,7 +89,7 @@ public class ViewController : MonoBehaviour {
         // Don't exit application on IOS, this will appear like a crash and 
         // will cause the application to loose saved data.
         #if !UNITY_IOS
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && currentView != viewDead)
         {
             if (previousViews.Count == 0 && !ModalController.instance.IsOpen())
             {

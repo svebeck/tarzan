@@ -272,7 +272,7 @@ public class MapGenerator : MonoBehaviour {
     public Coord FindNearestEmpty(int x, int y, int tries)
     {
         if (!IsInsideMap(x, y))
-            throw new UnityException("Can't find nearest outside of map.");
+            return new Coord(x, y);
         
         if (solidMap[x,y] == 0)
             return new Coord(x, y);

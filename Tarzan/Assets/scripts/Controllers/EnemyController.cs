@@ -84,7 +84,7 @@ public class EnemyController : MonoBehaviour {
 
         Coord coord = mapController.WorldPointToCoordClamped(spawnPosition);
 
-        coord = mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 5);
+        coord = mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 15);
 
         if (coord.tileX == -1 || coord.tileY == -1)
             return;

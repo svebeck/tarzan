@@ -38,12 +38,13 @@ public class HealthPanel : MonoBehaviour {
             return;
         }
 
+
         if (oldHealth == healthController.health)
             return;
         
         for(int i = 0; i < healthController.maxHealth; i++)
         {
-            float heartHealth = healthController.health - (i);
+            float heartHealth = healthController.health - i;
             heartHealth = Mathf.Clamp01(heartHealth);
             hearts[i].fillAmount = heartHealth;
         }
