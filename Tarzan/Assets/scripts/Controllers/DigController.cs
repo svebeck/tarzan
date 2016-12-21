@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityStandardAssets._2D;
 
 public class DigController : MonoBehaviour {
     public static DigController instance;
@@ -61,7 +62,9 @@ public class DigController : MonoBehaviour {
         if (onCooldown)
             return;
 
-        if (Input.GetKeyUp(KeyCode.E))
+        PlatformerCharacter2D character = player.GetComponent<PlatformerCharacter2D>();
+
+        if (Input.GetKeyUp(KeyCode.E) && digDamage > 0)
         {
             Vector3 pos = player.transform.position;
             Vector2 direction = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical")).normalized;
@@ -77,9 +80,9 @@ public class DigController : MonoBehaviour {
             StartCoroutine(Cooldown(digCooldown));
         }
 
-        if (Input.GetKeyUp(KeyCode.Q))
+        if (Input.GetKeyUp(KeyCode.Q) && bombDamage > 0)
         {
-            Vector2 direction = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical")).normalized*0.1f;
+            Vector2 direction = new Vector2 (character.GetFaceDirection(), Input.GetAxisRaw ("Vertical")).normalized;
             Vector3 pos = player.transform.position;    
 
             pos.x += direction.x;
@@ -122,8 +125,6 @@ public class DigController : MonoBehaviour {
                 }
             }
         }
-
-        Debug.Log("Dig coords: " + coord.ToString());
 
         mapGenerator.DrawCircle(diggedPlaces, coord, digRadius, digDamage, true);
 

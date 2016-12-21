@@ -64,6 +64,12 @@ public class HealthController : MonoBehaviour {
     }
 
 
+    public void GiveHealth(float value)
+    {
+        float newHealth = health + value;
+        health = newHealth > maxHealth ? maxHealth : newHealth;
+    }
+
     void Update()
     {
         if (health <= 0)

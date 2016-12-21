@@ -2,27 +2,26 @@
 using System.Collections;
 using System;
 using UnityEngine.Events;
+using TMPro;
 
-public class PickupItem : MonoBehaviour 
+public class HealthTrigger : MonoBehaviour 
 {
-    [Serializable]
-    public class OnEnter: UnityEvent { }
-
-    public OnEnter onEnter;
 
     bool pickedUp = false;
+
 
     void OnTriggerEnter2D(Collider2D collider)
     {
         if (collider.tag != "Player")
             return;
-        
+
         if (pickedUp)
             return;
 
         pickedUp = true;
 
-        onEnter.Invoke();
+        HealthController healthController = collider.gameObject.GetComponent<HealthController>();
+        healthController.GiveHealth(3f);
 
         StartCoroutine(ScaleDown());
     }
@@ -43,3 +42,4 @@ public class PickupItem : MonoBehaviour
     }
 
 }
+

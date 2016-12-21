@@ -191,7 +191,7 @@ public class MeshGenerator : MonoBehaviour{
         mesh.uv = uvs;
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.Optimize();
+        ;
 
         CreateWallMesh(chunk, startX, startY, width, height, chunkSize);
 
@@ -362,7 +362,7 @@ public class MeshGenerator : MonoBehaviour{
 
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.Optimize();
+        ;
 
         if (AreCollidersPolygons)
             CreateCollisionPolygons(chunk);

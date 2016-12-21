@@ -16,6 +16,9 @@ public class Trigger : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
+        if (collider.tag != "Player")
+            return;
+        
         if (pickedUp)
             return;
 

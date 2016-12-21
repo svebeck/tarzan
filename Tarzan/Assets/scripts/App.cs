@@ -26,6 +26,8 @@ public class App : MonoBehaviour
 
     IEnumerator Init() 
     {
+        Application.targetFrameRate = 60;
+
         Camera.main.GetComponent<Camera2DFollow>().target = PlayerSpawn.instance.spawnPoint;
 
         ViewController viewController = ViewController.instance;
