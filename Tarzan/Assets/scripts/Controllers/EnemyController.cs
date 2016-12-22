@@ -14,6 +14,7 @@ public class EnemyController : MonoBehaviour {
     public float maxSpawnDistance = 120f;
     public float killDistance = 140f;
     public float spawnInterwall = 0.2f;
+    public bool allowSpawnOutsideOfMap = false;
 
     public List<GameObject> enemyPrefabs;
     public List<float> rarity;
@@ -87,7 +88,12 @@ public class EnemyController : MonoBehaviour {
         coord = mapGenerator.FindNearestEmpty(coord.tileX, coord.tileY, 15);
 
         if (coord.tileX == -1 || coord.tileY == -1)
-            return;
+        {
+            if (!allowSpawnOutsideOfMap)
+                return;
+            else
+                coord = mapController.WorldPointToCoordClamped(spawnPosition);
+        }
 
         Coord playerCoord = mapController.WorldPointToCoordClamped(playerPosition);
 
