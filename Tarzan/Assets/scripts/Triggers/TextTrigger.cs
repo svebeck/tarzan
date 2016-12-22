@@ -50,7 +50,10 @@ public class TextTrigger : MonoBehaviour
         if (target == null)
             return;
 
-        text.transform.position = target.transform.position;
+        Vector3 targetPosition = target.transform.position;
+        targetPosition.z -= 5;
+        text.transform.position = targetPosition;
+
     }
 
     IEnumerator Animate()
@@ -66,10 +69,10 @@ public class TextTrigger : MonoBehaviour
             text.transform.localScale = new Vector3(scale, scale, scale);
         }
 
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 200; i++)
         {
             yield return new WaitForEndOfFrame();
-            text.alpha -= 0.01f;
+            text.alpha -= 0.005f;
         }
 
         Destroy(this);

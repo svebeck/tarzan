@@ -97,7 +97,7 @@ public class EnemyController : MonoBehaviour {
         float totalRarity = 0f;
 
         rarity.Sort(delegate(float a, float b) {
-            return a < b ? 1 : -1;
+            return a < b ? -1 : 1;
         });
 
         foreach (float rar in rarity)
@@ -108,18 +108,22 @@ public class EnemyController : MonoBehaviour {
         float value = Random.value;
 
         GameObject enemyPrefab = null;
-
+        float r = 0f;
         for (int i = 0; i < rarity.Count; i++)
         {
-            if (value < rarity[i]/totalRarity)
+            r += rarity[i];
+            Debug.Log("Enemy rarity: " + r);
+            if (value < r/totalRarity)
             {
+                Debug.Log("Spawn: " + i);
                 enemyPrefab = enemyPrefabs[i];
+                break;
             }
         }
 
         if (enemyPrefab == null)
         {
-            throw new UnityException("Rarity function is not really working :-/ no enemy selected");
+            throw new UnityException("Rarity function is not really working :-/ no enemy selected: " + value + " : tr: " + totalRarity);
         }
 
         Vector3 worldPos = mapController.CoordToWorldPoint(coord);

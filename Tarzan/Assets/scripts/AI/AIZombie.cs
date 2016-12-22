@@ -9,6 +9,7 @@ public class AIZombie : MonoBehaviour {
     public float wanderRange = 900f;
     public float closeRange = 10f;
     public float damage = 1f;
+    public float attackRange = 3f;
     public float attackReloadTime = 1f;
     public float attackMoveSpeed = 2f;
     public float idleMoveSpeed = 2f;
@@ -39,7 +40,7 @@ public class AIZombie : MonoBehaviour {
     float randomDirectionTimer = 0;
 
     float oldDiffX = 0;
-    Vector3 diff;
+    protected Vector3 diff;
     private float gravity;
 
     private bool m_Grounded;            // Whether or not the player is grounded.
@@ -51,7 +52,7 @@ public class AIZombie : MonoBehaviour {
     private float m_TimeFalling = 0; 
     private float m_FallSpeed = 0;
 
-    private float attackTime;
+    protected float attackTime;
 
     GameObject meshGameObject;
 
@@ -192,7 +193,7 @@ public class AIZombie : MonoBehaviour {
         rigidbody2D.drag = m_Swiming ? 0.5f : 0;
     }
 
-    void TryDoDamage()
+    protected virtual void TryDoDamage()
     {
         if (target == null)
             return;
@@ -201,7 +202,7 @@ public class AIZombie : MonoBehaviour {
         {
             bool isZombieEating = false;
 
-            if (diff.sqrMagnitude < 3)
+            if (diff.sqrMagnitude < attackRange)
                 isZombieEating = true;
 
             if (isZombieEating)
@@ -212,7 +213,7 @@ public class AIZombie : MonoBehaviour {
         attackTime += Time.fixedDeltaTime;
     }
 
-    void HandleDrowning()
+    protected void HandleDrowning()
     {
         if (m_Swiming)
         {
@@ -243,7 +244,7 @@ public class AIZombie : MonoBehaviour {
         }
     }
 
-    void HandleFalling()
+    protected void HandleFalling()
     {
         if (m_Grounded && m_TimeFalling > m_FallTimeLimit && m_FallSpeed < m_DangerousFallSpeed)
         {

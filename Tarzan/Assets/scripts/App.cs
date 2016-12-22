@@ -86,4 +86,10 @@ public class App : MonoBehaviour
     {
         SceneManager.LoadScene("Level"+level);
     }
+
+    public void Win()
+    {
+        player.SetActive(false);
+        ViewController.instance.ChangeView(ViewController.instance.viewVictory);
+    }
 }

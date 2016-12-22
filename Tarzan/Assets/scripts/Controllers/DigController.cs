@@ -87,7 +87,7 @@ public class DigController : MonoBehaviour {
 
             pos.x += direction.x;
 
-            StartCoroutine(Bomb(pos, direction));  
+            StartCoroutine(PlantBomb(pos, direction));  
             StartCoroutine(Cooldown(digCooldown));     
         }
 	}
@@ -185,9 +185,8 @@ public class DigController : MonoBehaviour {
     }
 
     Vector3 bombPosition;
-    public IEnumerator Bomb(Vector3 pos, Vector2 force)
+    public IEnumerator PlantBomb(Vector3 pos, Vector2 force)
     {
-
         bombPosition = pos;
 
         GameObject go = Instantiate(bombPrefab);
@@ -197,10 +196,14 @@ public class DigController : MonoBehaviour {
 
         yield return new WaitForSeconds(1.9f);
 
-        pos = go.transform.position;
+        ExplodeBomb(go.transform.position);
+    }
+
+    public void ExplodeBomb(Vector3 pos)
+    {
         Coord coord = mapController.WorldPointToCoord(pos);
 
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(go.transform.position, bombRadius);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(pos, bombRadius);
         for (int i = 0; i < colliders.Length; i++)
         {
             if (colliders[i].gameObject != gameObject)
@@ -212,7 +215,6 @@ public class DigController : MonoBehaviour {
                 }
             }
         }
-
 
         mapGenerator.DrawCircle(diggedPlaces, coord, bombRadius, bombDamage, true);
 
@@ -227,13 +229,13 @@ public class DigController : MonoBehaviour {
             {
                 if (mapGenerator.solidMap[x, y]-1 < 0)
                     continue;
-                
+
                 if (diggedPlaces[x,y] >= mapGenerator.materialHealth[mapGenerator.solidMap[x, y]-1])
                 {
                     mapGenerator.solidMap[x, y] = 0;
                     dirty = true;
 
-                    go = Instantiate(digPrefab);
+                    GameObject go = Instantiate(digPrefab);
                     Vector3 worldPos = mapController.CoordToWorldPoint(new Coord(x,y));
                     go.transform.position = worldPos; 
                 }
@@ -241,7 +243,7 @@ public class DigController : MonoBehaviour {
         }
 
         if (!dirty)
-            yield break;
+            return;
 
         dirty = false;
 

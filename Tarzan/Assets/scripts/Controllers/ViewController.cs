@@ -11,6 +11,7 @@ public class ViewController : MonoBehaviour {
     public View viewShop;
     public View viewLoading;
     public View viewDead;
+    public View viewVictory;
 
     private View currentView;
     private List<View> previousViews = new List<View>();
@@ -34,6 +35,7 @@ public class ViewController : MonoBehaviour {
         viewShop.SetActive(true);
         viewLoading.SetActive(true);
         viewDead.SetActive(true);
+        viewVictory.SetActive(true);
     }
 
     public void Init()
@@ -42,6 +44,7 @@ public class ViewController : MonoBehaviour {
         viewShop.SetActive(false);
         viewLoading.SetActive(false);
         viewDead.SetActive(false);
+        viewVictory.SetActive(false);
     }
 
     public void ChangeView(View view)
@@ -126,8 +129,8 @@ public class ViewController : MonoBehaviour {
         {
             if (currentView != null)
                 currentView.SetActive(false);
-            
-            view.SetActive(true);
+
+            view.GetComponent<AnimateScreen>().Center(true);
         }
     }
 
