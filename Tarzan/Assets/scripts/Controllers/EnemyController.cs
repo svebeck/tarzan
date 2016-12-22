@@ -89,6 +89,16 @@ public class EnemyController : MonoBehaviour {
         if (coord.tileX == -1 || coord.tileY == -1)
             return;
 
+        Coord playerCoord = mapController.WorldPointToCoordClamped(playerPosition);
+
+        float diff = (coord.tileX*coord.tileX+coord.tileY*coord.tileY) - (playerCoord.tileX*playerCoord.tileX+playerCoord.tileY*playerCoord.tileY);
+
+        if (diff*diff < 5*5)
+        {
+            Debug.Log("Canceled spawn, too close!");
+            return;
+        }
+
         SpawnRandomEnemyAtCoord(coord);
     }
 

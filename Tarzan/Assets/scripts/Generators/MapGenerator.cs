@@ -272,7 +272,7 @@ public class MapGenerator : MonoBehaviour {
     public Coord FindNearestEmpty(int x, int y, int tries)
     {
         if (!IsInsideMap(x, y))
-            return new Coord(x, y);
+            return new Coord(-1, -1);
         
         if (solidMap[x,y] == 0)
             return new Coord(x, y);

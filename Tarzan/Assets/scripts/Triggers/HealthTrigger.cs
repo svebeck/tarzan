@@ -38,6 +38,9 @@ public class HealthTrigger : MonoBehaviour
             transform.localScale = new Vector3(scale, scale, scale);
         }
 
+        //added delay for doing text effect
+        yield return new WaitForSeconds(5f);
+
         Destroy(this);
     }
 
