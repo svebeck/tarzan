@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine.SceneManagement;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class MapGenerator : MonoBehaviour {
     public static MapGenerator instance;
 
     [Header("Map Settings")]
+    public bool loadFromResources;
     public int height = 128;
     public int width = 128;
 
@@ -74,6 +77,13 @@ public class MapGenerator : MonoBehaviour {
 
     public IEnumerator Generate()
     {
+        if (loadFromResources)
+        {
+            LoadFromResources();
+            transform.position = new Vector3(0, -height*0.5f * MapController.instance.squareSize);
+            yield break;
+        }
+
         solidMap = new int[width, height];
         fluidMap = new int[width, height];
 
@@ -620,6 +630,51 @@ public class MapGenerator : MonoBehaviour {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
+    public void LoadFromResources()
+    {
+        TextAsset textAsset = Resources.Load<TextAsset>("MapData");
+        Stream stream = new MemoryStream(textAsset.bytes);
+        BinaryFormatter formatter = new BinaryFormatter();     
+
+        MapData mapData = formatter.Deserialize(stream) as MapData;
+        fluidMap = mapData.fluidMap;
+        solidMap = mapData.solidMap;
+        width = solidMap.GetLength(0);
+        height = solidMap.GetLength(1);
+    }
+  
+    public void SaveItemInfo()
+    {
+        string path = null;
+        #if UNITY_EDITOR
+        path = "Assets/Resources/MapData.bytes";
+        #elif UNITY_STANDALONE
+        // You cannot add a subfolder, at least it does not work for me
+        path = "MyGame_Data/Resources/ItemInfo.json"
+        #endif
+
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(path);
+        MapData data = new MapData();
+        data.solidMap = solidMap;
+        data.fluidMap = fluidMap;
+
+        bf.Serialize(file, data);
+        file.Close();
+
+        #if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh ();
+        #endif
+
+
+    }
+
+
+    [Serializable]
+    class MapData {
+        public int[,] solidMap;
+        public int[,] fluidMap;
+    }
 
     class Room : IComparable<Room>
     {
